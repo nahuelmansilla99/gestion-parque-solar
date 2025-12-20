@@ -24,18 +24,16 @@ export function InspeccionForm({ panelId, onCerrar }) {
         e.preventDefault()
         setLoading(true)
 
-        // 1. Lógica AUTOMÁTICA de Estado (Tu estrategia condicional)
-        let estadoCalculado = 'OPERATIVO' // Verde por defecto
-
-        // Si hay hotspot alto (>20ºC) o falla la sujeción -> CRITICO
+        // 1. Lógica del Semáforo
+        let estadoCalculado = 'OPERATIVO'
         if (formData.temp_hotspot > 20 || !formData.sujecion_ok) {
             estadoCalculado = 'CRITICO'
         } else if (formData.limpieza === 'Baja') {
             estadoCalculado = 'ALERTA'
         }
 
-        // 2. Guardar en Supabase
-        const { error } = await supabase
+        // 2. Guardar el Historial (Inspecciones)
+        const { error: errorInsert } = await supabase
             .from('inspecciones')
             .insert([
                 {
@@ -44,17 +42,24 @@ export function InspeccionForm({ panelId, onCerrar }) {
                     sujecion_ok: formData.sujecion_ok,
                     temp_hotspot: parseFloat(formData.temp_hotspot),
                     observaciones: formData.observaciones,
-                    estado_calculado: estadoCalculado, // ¡La magia!
-                    tecnico_nombre: 'Nahuel' // Hardcodeado por ahora
+                    estado_calculado: estadoCalculado,
+                    tecnico_nombre: 'Nahuel'
                 }
             ])
 
+        // 3. Actualizar el estado actual del Panel (Para que se vea en la lista)
+        const { error: errorUpdate } = await supabase
+            .from('paneles')
+            .update({ ultimo_estado: estadoCalculado })
+            .eq('id', panelId)
+
         setLoading(false)
-        if (error) {
-            alert('Error guardando: ' + error.message)
+
+        if (errorInsert || errorUpdate) {
+            alert('Error guardando datos')
         } else {
-            alert('¡Inspección Guardada! Estado: ' + estadoCalculado)
-            onCerrar() // Cierra el formulario
+            alert('¡Panel Actualizado a: ' + estadoCalculado + '!')
+            onCerrar() // Cierra y vuelve a la lista
         }
     }
 
