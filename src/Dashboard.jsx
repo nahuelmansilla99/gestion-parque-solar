@@ -4,10 +4,10 @@ export function Dashboard({ paneles }) {
 
     // 1. Calcular estadísticas en tiempo real
     const data = [
-        { name: 'Críticos', value: 0, color: '#ff4d4f' }, // Rojo
-        { name: 'Alerta', value: 0, color: '#faad14' },   // Amarillo
-        { name: 'Operativos', value: 0, color: '#52c41a' },// Verde
-        { name: 'Pendientes', value: 0, color: '#d9d9d9' } // Gris
+        { name: 'Críticos', value: 0, color: 'var(--status-critical)' }, // Rojo
+        { name: 'Alerta', value: 0, color: 'var(--status-warning)' },   // Amarillo
+        { name: 'Operativos', value: 0, color: 'var(--status-success)' },// Verde
+        { name: 'Pendientes', value: 0, color: 'var(--status-dim)' } // Gris
     ];
 
     paneles.forEach(panel => {
@@ -22,42 +22,26 @@ export function Dashboard({ paneles }) {
     const totalPaneles = paneles.length;
 
     return (
-        <div style={{
-            background: '#fff',
-            padding: '20px',
-            borderRadius: '12px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            marginBottom: '20px',
-            display: 'flex',
-            justifyContent: 'space-around',
-            alignItems: 'center',
-            flexWrap: 'wrap'
-        }}>
+        <div className="bg-surface p-5 rounded-xl shadow-lg mb-5 flex justify-around items-center flex-wrap border border-border">
 
             {/* SECCIÓN DE TEXTO / KPIs */}
-            <div style={{ minWidth: '200px' }}>
-                <h2 style={{ margin: '0 0 10px 0', color: '#333' }}>Resumen del Parque</h2>
-                <div style={{ fontSize: '3rem', fontWeight: 'bold', color: '#333' }}>
-                    {totalPaneles} <span style={{ fontSize: '1rem', fontWeight: 'normal' }}>Paneles Totales</span>
+            <div className="min-w-[200px]">
+                <h2 className="m-0 mb-2 text-muted text-sm uppercase tracking-wider font-semibold">Resumen del Parque</h2>
+                <div className="text-5xl font-bold text-heading">
+                    {totalPaneles} <span className="text-sm font-normal text-muted">Paneles Totales</span>
                 </div>
 
                 {/* Alerta de Acción Rápida */}
                 {data[0].value > 0 && (
-                    <div style={{
-                        marginTop: '15px',
-                        padding: '10px',
-                        background: '#fff1f0',
-                        border: '1px solid #ffccc7',
-                        borderRadius: '6px',
-                        color: '#cf1322'
-                    }}>
-                        ⚠️ <strong>{data[0].value} Paneles Críticos</strong> requieren atención inmediata.
+                    <div className="mt-4 p-3 border border-[var(--status-critical)] rounded-md text- flex items-center gap-2">
+                        <span className="text-xl">⚠️</span>
+                        <span><strong>{data[0].value} Paneles Críticos</strong> requieren atención.</span>
                     </div>
                 )}
             </div>
 
             {/* SECCIÓN DEL GRÁFICO */}
-            <div style={{ width: '300px', height: '300px' }}>
+            <div className="w-[300px] h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
@@ -68,13 +52,17 @@ export function Dashboard({ paneles }) {
                             outerRadius={80}
                             paddingAngle={5}
                             dataKey="value"
+                            stroke="none"
                         >
                             {dataVisible.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                         </Pie>
-                        <Tooltip />
-                        <Legend />
+                        <Tooltip
+                            contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border-main)', color: 'var(--text-main)' }}
+                            itemStyle={{ color: 'var(--text-main)' }}
+                        />
+                        <Legend wrapperStyle={{ color: '#94a3b8' }} />
                     </PieChart>
                 </ResponsiveContainer>
             </div>

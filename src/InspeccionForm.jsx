@@ -64,57 +64,81 @@ export function InspeccionForm({ panelId, onCerrar }) {
     }
 
     return (
-        <div style={{ border: '2px solid #ccc', padding: '20px', marginTop: '10px', background: '#f9f9f9', color: '#333' }}>
-            <h3>Inspeccionando Panel #{panelId}</h3>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="border border-border p-6 mt-6 bg-surface text-heading rounded-xl shadow-2xl">
+            <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                <span className="text-brand-secondary">🔍</span> Inspeccionando Panel #{panelId}
+            </h3>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
                 {/* CHECKLIST VISUAL */}
-                <label>
-                    Nivel de Limpieza:
-                    <select name="limpieza" value={formData.limpieza} onChange={handleChange} style={{ marginLeft: '10px' }}>
-                        <option value="Alta">Alta (Limpio)</option>
-                        <option value="Media">Media</option>
-                        <option value="Baja">Baja (Sucio)</option>
-                    </select>
-                </label>
+                <div className="space-y-4">
+                    <label className="flex items-center justify-between p-3 bg-surface-light/50 rounded-lg border border-border hover:border-brand-secondary/50 transition-colors">
+                        <span className="font-medium text-main">Nivel de Limpieza:</span>
+                        <select
+                            name="limpieza"
+                            value={formData.limpieza}
+                            onChange={handleChange}
+                            className="ml-3 p-2 border border-border-light rounded bg-background text-heading focus:outline-none focus:ring-2 focus:ring-brand-secondary"
+                        >
+                            <option value="Alta">Alta (Limpio)</option>
+                            <option value="Media">Media</option>
+                            <option value="Baja">Baja (Sucio)</option>
+                        </select>
+                    </label>
 
-                <label>
-                    <input
-                        type="checkbox"
-                        name="sujecion_ok"
-                        checked={formData.sujecion_ok}
-                        onChange={handleChange}
-                    />
-                    ¿Sujeción e Integridad OK?
-                </label>
+                    <label className="flex items-center justify-between p-3 bg-surface-light/50 rounded-lg border border-border hover:border-brand-secondary/50 transition-colors cursor-pointer">
+                        <span className="font-medium text-main">¿Sujeción e Integridad OK?</span>
+                        <input
+                            type="checkbox"
+                            name="sujecion_ok"
+                            checked={formData.sujecion_ok}
+                            onChange={handleChange}
+                            className="h-5 w-5 rounded border-border-light bg-background text-brand focus:ring-brand-secondary"
+                        />
+                    </label>
 
-                {/* INSTRUMENTOS (Termografía) */}
-                <label>
-                    Temp. Max Hotspot (ºC):
-                    <input
-                        type="number"
-                        name="temp_hotspot"
-                        value={formData.temp_hotspot}
-                        onChange={handleChange}
-                        style={{ marginLeft: '10px', width: '60px' }}
-                    />
-                </label>
+                    {/* INSTRUMENTOS (Termografía) */}
+                    <label className="flex items-center justify-between p-3 bg-surface-light/50 rounded-lg border border-border hover:border-brand-secondary/50 transition-colors">
+                        <span className="font-medium text-main flex items-center gap-2">
+                            <span>🌡️</span> Temp. Max Hotspot (ºC):
+                        </span>
+                        <input
+                            type="number"
+                            name="temp_hotspot"
+                            value={formData.temp_hotspot}
+                            onChange={handleChange}
+                            className="ml-3 w-24 p-2 border border-border-light rounded bg-background text-heading focus:outline-none focus:ring-2 focus:ring-brand-secondary text-right"
+                        />
+                    </label>
+                </div>
 
-                <label>
-                    Observaciones:
+                <label className="flex flex-col">
+                    <span className="font-medium mb-2 text-muted">Observaciones:</span>
                     <textarea
                         name="observaciones"
                         value={formData.observaciones}
                         onChange={handleChange}
                         rows="3"
+                        className="p-3 border border-border-light rounded-lg bg-background text-heading w-full focus:outline-none focus:ring-2 focus:ring-brand-secondary"
+                        placeholder="Escribe aquí notas adicionales del técnico..."
                     />
                 </label>
 
-                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                    <button type="submit" disabled={loading}>
+                <div className="flex gap-3 mt-4 pt-4 border-t border-border">
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="flex-1 px-4 py-2 bg-brand text-heading font-medium rounded-lg hover:bg-brand-secondary disabled:bg-surface-light disabled:text-muted transition-all shadow-lg shadow-brand/30"
+                    >
                         {loading ? 'Guardando...' : 'Guardar Inspección'}
                     </button>
-                    <button type="button" onClick={onCerrar}>Cancelar</button>
+                    <button
+                        type="button"
+                        onClick={onCerrar}
+                        className="px-4 py-2 bg-surface-light text-main font-medium rounded-lg hover:bg-border-light transition-colors border border-border-light"
+                    >
+                        Cancelar
+                    </button>
                 </div>
             </form>
         </div>

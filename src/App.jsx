@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { InspeccionForm } from './InspeccionForm'
-import { Dashboard } from './Dashboard' // <--- 1. IMPORTAR
+import { Dashboard } from './Dashboard'
 
 function App() {
   const [paneles, setPaneles] = useState([])
@@ -14,93 +14,139 @@ function App() {
   async function getPaneles() {
     const { data, error } = await supabase
       .from('paneles')
-      .select('*')
+      .select(`
+        *,
+        inspecciones (
+          temp_hotspot,
+          limpieza,
+          sujecion_ok,
+          estado_calculado,
+          created_at
+        )
+      `)
       .order('id', { ascending: true })
 
     if (error) console.log('Error:', error)
     else setPaneles(data)
   }
 
-  const getColorEstado = (estado) => {
+  const getStatusColor = (estado) => {
     switch (estado) {
-      case 'CRITICO': return '#ff4d4f';
-      case 'ALERTA': return '#faad14';
-      case 'OPERATIVO': return '#52c41a';
-      default: return '#d9d9d9';
+      case 'CRITICO': return 'bg-[var(--status-critical)] shadow-[0_0_8px_rgba(239,68,68,0.6)]';
+      case 'ALERTA': return 'bg-[var(--status-warning)] shadow-[0_0_8px_rgba(234,179,8,0.6)]';
+      case 'OPERATIVO': return 'bg-[var(--status-success)] shadow-[0_0_8px_rgba(34,197,94,0.6)]';
+      default: return 'bg-[var(--status-dim)]';
     }
   }
 
+  const getDiagnostico = (panel) => {
+    if (panel.ultimo_estado === 'PENDIENTE') return <span className="text-gray-500">-</span>;
+    if (panel.ultimo_estado === 'OPERATIVO') return <span className="text-green-400">Rendimiento óptimo</span>;
+
+    // Buscar la última inspección
+    if (!panel.inspecciones || panel.inspecciones.length === 0) return <span className="text-gray-500">Sin datos</span>;
+
+    // Ordenar por fecha (más reciente primero) si vienen desordenadas
+    const inspecciones = panel.inspecciones.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const last = inspecciones[0];
+
+    if (last.estado_calculado === 'CRITICO') {
+      if (last.temp_hotspot > 20) return <span className="text-critical">🔥 Hotspot: {last.temp_hotspot}ºC</span>;
+      if (!last.sujecion_ok) return <span className="text-critical">⚠️ Sujeción Fallida</span>;
+    }
+    if (last.estado_calculado === 'ALERTA') {
+      if (last.limpieza === 'Baja') return <span className="text-warning">🧹 Limpieza Requerida</span>;
+    }
+
+    return <span className="text-muted">Ver detalles</span>;
+  }
+
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '1000px', margin: '0', background: '#f0f2f5', minHeight: '100vh', justifyContent: 'center' }}>
+    <div className="min-h-screen bg-background text-main p-8 font-sans">
 
-      <h1 style={{ textAlign: 'center', color: '#001529' }}>⚡ SolarCondicional Manager</h1>
-
-      {/* 2. AGREGAR EL DASHBOARD AQUÍ */}
-      {/* Solo lo mostramos si NO estamos inspeccionando un panel, para no distraer */}
-      {!panelSeleccionado && <Dashboard paneles={paneles} />}
-
-      {panelSeleccionado ? (
-        <InspeccionForm
-          panelId={panelSeleccionado}
-          onCerrar={() => setPanelSeleccionado(null)}
-        />
-      ) : (
-        <div>
-          <h2 style={{ marginLeft: '10px', color: 'black' }}>Inventario de Paneles</h2>
-          <div style={{ display: 'grid', gap: '10px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-            {paneles.map((panel) => (
-              <div
-                key={panel.id}
-                onClick={() => setPanelSeleccionado(panel.id)}
-                style={{
-                  padding: '15px',
-                  borderLeft: `6px solid ${getColorEstado(panel.ultimo_estado)}`, // Borde de color lindo
-                  borderRadius: '8px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  cursor: 'pointer',
-                  color: 'black',
-                  background: 'white',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
-                  transition: 'transform 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  {/* Etiqueta pequeña de estado */}
-                  <span style={{
-                    fontSize: '0.8rem',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    background: '#eee',
-                    fontWeight: 'bold'
-                  }}>
-                    #{panel.id}
-                  </span>
-
-                  <div>
-                    <strong style={{ display: 'block' }}>{panel.codigo_serie}</strong>
-                    <span style={{ fontSize: '0.85em', color: '#888' }}>{panel.modelo}</span>
-                  </div>
-                </div>
-
-                <button style={{
-                  padding: '6px 12px',
-                  cursor: 'pointer',
-                  border: 'none',
-                  background: '#1890ff',
-                  color: 'white',
-                  borderRadius: '4px'
-                }}>
-                  {panel.ultimo_estado === 'PENDIENTE' ? 'Inspeccionar' : 'Ver / Editar'}
-                </button>
-              </div>
-            ))}
+      <div className="max-w-7xl mx-auto">
+        <header className="flex justify-between items-center mb-8 border-b border-border pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand rounded-lg flex items-center justify-center text-heading font-bold text-xl shadow-lg shadow-blue-900/50">
+              ⚡
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-heading">SolarCondicional <span className="text-brand-secondary">Manager</span></h1>
           </div>
-        </div>
-      )}
+          <div className="text-sm text-muted">
+            Parque Fotovoltaico "La Luz 1"
+          </div>
+        </header>
+
+        {/* DASHBOARD */}
+        {!panelSeleccionado && <Dashboard paneles={paneles} />}
+
+        {panelSeleccionado ? (
+          <InspeccionForm
+            panelId={panelSeleccionado}
+            onCerrar={() => setPanelSeleccionado(null)}
+          />
+        ) : (
+          <div className="bg-surface/50 backdrop-blur-sm rounded-xl border border-border overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-border flex justify-between items-center bg-surface">
+              <h2 className="text-lg font-semibold text-heading">Estado de Paneles en Tiempo Real</h2>
+              <span className="text-xs px-2 py-1 bg-surface-light rounded text-muted border border-border-light">Total: {paneles.length}</span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-background/50 text-muted text-xs uppercase tracking-wider">
+                    <th className="p-4 font-medium border-b border-border">Panel ID</th>
+                    <th className="p-4 font-medium border-b border-border">Modelo / Serie</th>
+                    <th className="p-4 font-medium border-b border-border">Estado</th>
+                    <th className="p-4 font-medium border-b border-border">Diagnóstico / Rendimiento</th>
+                    <th className="p-4 font-medium border-b border-border text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {paneles.map((panel) => (
+                    <tr
+                      key={panel.id}
+                      className="hover:bg-surface-light/30 transition-colors group"
+                    >
+                      <td className="p-4 text-muted font-mono text-sm">
+                        #{panel.id.toString().padStart(3, '0')}
+                      </td>
+                      <td className="p-4">
+                        <div className="font-medium text-heading">{panel.codigo_serie}</div>
+                        <div className="text-xs text-muted">{panel.modelo}</div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(panel.ultimo_estado)}`}></div>
+                          <span className={`text-sm font-medium ${panel.ultimo_estado === 'CRITICO' ? 'text-critical' :
+                            panel.ultimo_estado === 'ALERTA' ? 'text-warning' :
+                              panel.ultimo_estado === 'OPERATIVO' ? 'text-success' :
+                                'text-muted'
+                            }`}>
+                            {panel.ultimo_estado || 'PENDIENTE'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="p-4 text-sm font-medium">
+                        {getDiagnostico(panel)}
+                      </td>
+                      <td className="p-4 text-right">
+                        <button
+                          onClick={() => setPanelSeleccionado(panel.id)}
+                          className="px-3 py-1.5 text-xs font-medium bg-surface-light hover:bg-brand text-heading rounded border border-border-light hover:border-brand-secondary transition-all shadow-sm"
+                        >
+                          {panel.ultimo_estado === 'PENDIENTE' ? 'Realizar Inspección' : 'Ver / Editar'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
