@@ -1,0 +1,66 @@
+export function ParqueList({ parques }) {
+    if (!parques || parques.length === 0) {
+        return (
+            <div className="bg-surface/30 rounded-xl border border-border p-12 text-center">
+                <div className="text-6xl mb-4">⚡</div>
+                <h3 className="text-xl font-semibold text-heading mb-2">No hay parques registrados</h3>
+                <p className="text-muted">Registra tu primer parque solar usando el formulario anterior</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-surface/50 backdrop-blur-sm rounded-xl border border-border overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-border flex justify-between items-center bg-surface">
+                <h2 className="text-lg font-semibold text-heading">Parques Registrados</h2>
+                <span className="text-xs px-2 py-1 bg-surface-light rounded text-muted border border-border-light">
+                    Total: {parques.length}
+                </span>
+            </div>
+
+            <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-background/50 text-muted text-xs uppercase tracking-wider">
+                            <th className="p-4 font-medium border-b border-border">ID</th>
+                            <th className="p-4 font-medium border-b border-border">Cliente</th>
+                            <th className="p-4 font-medium border-b border-border">Ubicación</th>
+                            <th className="p-4 font-medium border-b border-border">Capacidad (MWp)</th>
+                            <th className="p-4 font-medium border-b border-border">Fecha Registro</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/50">
+                        {parques.map((parque) => (
+                            <tr
+                                key={parque.id_parque}
+                                className="hover:bg-surface-light/30 transition-colors group"
+                            >
+                                <td className="p-4 text-muted font-mono text-sm">
+                                    #{parque.id_parque.toString().padStart(3, '0')}
+                                </td>
+                                <td className="p-4">
+                                    <div className="font-medium text-heading">{parque.nombre_cliente}</div>
+                                </td>
+                                <td className="p-4 text-main">
+                                    {parque.ubicacion_geo}
+                                </td>
+                                <td className="p-4">
+                                    <span className="text-brand-secondary font-semibold">
+                                        {parque.capacidad_instalada} MWp
+                                    </span>
+                                </td>
+                                <td className="p-4 text-muted text-sm">
+                                    {new Date(parque.created_at).toLocaleDateString('es-AR', {
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric'
+                                    })}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+}

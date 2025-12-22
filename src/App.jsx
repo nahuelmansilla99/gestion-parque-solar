@@ -2,13 +2,19 @@ import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { InspeccionForm } from './InspeccionForm'
 import { Dashboard } from './Dashboard'
+import { Navigation } from './Navigation'
+import { ParqueForm } from './ParqueForm'
+import { ParqueList } from './ParqueList'
 
 function App() {
   const [paneles, setPaneles] = useState([])
   const [panelSeleccionado, setPanelSeleccionado] = useState(null)
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [parques, setParques] = useState([])
 
   useEffect(() => {
     getPaneles()
+    getParques()
   }, [panelSeleccionado])
 
   async function getPaneles() {
@@ -28,6 +34,16 @@ function App() {
 
     if (error) console.log('Error:', error)
     else setPaneles(data)
+  }
+
+  async function getParques() {
+    const { data, error } = await supabase
+      .from('new_parque')
+      .select('*')
+      .order('id_parque', { ascending: true })
+
+    if (error) console.log('Error:', error)
+    else setParques(data)
   }
 
   const getStatusColor = (estado) => {
@@ -77,73 +93,88 @@ function App() {
           </div>
         </header>
 
-        {/* DASHBOARD */}
-        {!panelSeleccionado && <Dashboard paneles={paneles} />}
+        {/* NAVIGATION */}
+        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {panelSeleccionado ? (
-          <InspeccionForm
-            panelId={panelSeleccionado}
-            onCerrar={() => setPanelSeleccionado(null)}
-          />
-        ) : (
-          <div className="bg-surface/50 backdrop-blur-sm rounded-xl border border-border overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-border flex justify-between items-center bg-surface">
-              <h2 className="text-lg font-semibold text-heading">Estado de Paneles en Tiempo Real</h2>
-              <span className="text-xs px-2 py-1 bg-surface-light rounded text-muted border border-border-light">Total: {paneles.length}</span>
-            </div>
+        {/* DASHBOARD TAB */}
+        {activeTab === 'dashboard' && (
+          <>
+            {!panelSeleccionado && <Dashboard paneles={paneles} />}
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-background/50 text-muted text-xs uppercase tracking-wider">
-                    <th className="p-4 font-medium border-b border-border">Panel ID</th>
-                    <th className="p-4 font-medium border-b border-border">Modelo / Serie</th>
-                    <th className="p-4 font-medium border-b border-border">Estado</th>
-                    <th className="p-4 font-medium border-b border-border">Diagnóstico / Rendimiento</th>
-                    <th className="p-4 font-medium border-b border-border text-right">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
-                  {paneles.map((panel) => (
-                    <tr
-                      key={panel.id}
-                      className="hover:bg-surface-light/30 transition-colors group"
-                    >
-                      <td className="p-4 text-muted font-mono text-sm">
-                        #{panel.id.toString().padStart(3, '0')}
-                      </td>
-                      <td className="p-4">
-                        <div className="font-medium text-heading">{panel.codigo_serie}</div>
-                        <div className="text-xs text-muted">{panel.modelo}</div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(panel.ultimo_estado)}`}></div>
-                          <span className={`text-sm font-medium ${panel.ultimo_estado === 'CRITICO' ? 'text-critical' :
-                            panel.ultimo_estado === 'ALERTA' ? 'text-warning' :
-                              panel.ultimo_estado === 'OPERATIVO' ? 'text-success' :
-                                'text-muted'
-                            }`}>
-                            {panel.ultimo_estado || 'PENDIENTE'}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="p-4 text-sm font-medium">
-                        {getDiagnostico(panel)}
-                      </td>
-                      <td className="p-4 text-right">
-                        <button
-                          onClick={() => setPanelSeleccionado(panel.id)}
-                          className="px-3 py-1.5 text-xs font-medium bg-surface-light hover:bg-brand text-heading rounded border border-border-light hover:border-brand-secondary transition-all shadow-sm"
+            {panelSeleccionado ? (
+              <InspeccionForm
+                panelId={panelSeleccionado}
+                onCerrar={() => setPanelSeleccionado(null)}
+              />
+            ) : (
+              <div className="bg-surface/50 backdrop-blur-sm rounded-xl border border-border overflow-hidden shadow-2xl">
+                <div className="p-6 border-b border-border flex justify-between items-center bg-surface">
+                  <h2 className="text-lg font-semibold text-heading">Estado de Paneles en Tiempo Real</h2>
+                  <span className="text-xs px-2 py-1 bg-surface-light rounded text-muted border border-border-light">Total: {paneles.length}</span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-background/50 text-muted text-xs uppercase tracking-wider">
+                        <th className="p-4 font-medium border-b border-border">Panel ID</th>
+                        <th className="p-4 font-medium border-b border-border">Modelo / Serie</th>
+                        <th className="p-4 font-medium border-b border-border">Estado</th>
+                        <th className="p-4 font-medium border-b border-border">Diagnóstico / Rendimiento</th>
+                        <th className="p-4 font-medium border-b border-border text-right">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/50">
+                      {paneles.map((panel) => (
+                        <tr
+                          key={panel.id}
+                          className="hover:bg-surface-light/30 transition-colors group"
                         >
-                          {panel.ultimo_estado === 'PENDIENTE' ? 'Realizar Inspección' : 'Ver / Editar'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          <td className="p-4 text-muted font-mono text-sm">
+                            #{panel.id.toString().padStart(3, '0')}
+                          </td>
+                          <td className="p-4">
+                            <div className="font-medium text-heading">{panel.codigo_serie}</div>
+                            <div className="text-xs text-muted">{panel.modelo}</div>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(panel.ultimo_estado)}`}></div>
+                              <span className={`text-sm font-medium ${panel.ultimo_estado === 'CRITICO' ? 'text-critical' :
+                                panel.ultimo_estado === 'ALERTA' ? 'text-warning' :
+                                  panel.ultimo_estado === 'OPERATIVO' ? 'text-success' :
+                                    'text-muted'
+                                }`}>
+                                {panel.ultimo_estado || 'PENDIENTE'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="p-4 text-sm font-medium">
+                            {getDiagnostico(panel)}
+                          </td>
+                          <td className="p-4 text-right">
+                            <button
+                              onClick={() => setPanelSeleccionado(panel.id)}
+                              className="px-3 py-1.5 text-xs font-medium bg-surface-light hover:bg-brand text-heading rounded border border-border-light hover:border-brand-secondary transition-all shadow-sm"
+                            >
+                              {panel.ultimo_estado === 'PENDIENTE' ? 'Realizar Inspección' : 'Ver / Editar'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* PARQUES TAB */}
+        {activeTab === 'parques' && (
+          <div className="space-y-6">
+            <ParqueForm onParqueCreado={getParques} />
+            <ParqueList parques={parques} />
           </div>
         )}
       </div>
