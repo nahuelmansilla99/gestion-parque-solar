@@ -118,8 +118,8 @@ export function ParqueForm({ onParqueCreado }) {
                 {/* Mensaje de feedback */}
                 {mensaje.texto && (
                     <div className={`p-4 rounded-lg border ${mensaje.tipo === 'success'
-                            ? 'bg-status-success/10 border-status-success/50 text-status-success'
-                            : 'bg-status-critical/10 border-status-critical/50 text-status-critical'
+                        ? 'bg-status-success/10 border-status-success/50 text-status-success'
+                        : 'bg-status-critical/10 border-status-critical/50 text-status-critical'
                         }`}>
                         {mensaje.texto}
                     </div>
@@ -129,7 +129,7 @@ export function ParqueForm({ onParqueCreado }) {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full px-6 py-3 bg-brand-primary hover:bg-brand-secondary text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-brand-glow disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-6 py-3 bg-brand hover:bg-brand-secondary text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-brand-glow disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {loading ? 'Registrando...' : 'Registrar Parque'}
                 </button>
