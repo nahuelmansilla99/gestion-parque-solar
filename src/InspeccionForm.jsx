@@ -6,9 +6,9 @@ export function InspeccionForm({ panelId, onCerrar }) {
 
     // Estados para tus datos de campo
     const [formData, setFormData] = useState({
-        limpieza: 'Media',      // Default
-        sujecion_ok: true,      // Checkbox
-        temp_hotspot: 0,        // Termografía
+        tecnico_responsable: '',
+        clima: 'Soleado',
+        tipo_inspeccion: 'Termográfica',
         observaciones: ''
     })
 
@@ -24,41 +24,25 @@ export function InspeccionForm({ panelId, onCerrar }) {
         e.preventDefault()
         setLoading(true)
 
-        // 1. Lógica del Semáforo
-        let estadoCalculado = 'OPERATIVO'
-        if (formData.temp_hotspot > 20 || !formData.sujecion_ok) {
-            estadoCalculado = 'CRITICO'
-        } else if (formData.limpieza === 'Baja') {
-            estadoCalculado = 'ALERTA'
-        }
-
-        // 2. Guardar el Historial (Inspecciones)
+        // Guardar la inspección en la nueva tabla
         const { error: errorInsert } = await supabase
-            .from('inspecciones')
+            .from('new_inspecciones')
             .insert([
                 {
-                    panel_id: panelId,
-                    limpieza: formData.limpieza,
-                    sujecion_ok: formData.sujecion_ok,
-                    temp_hotspot: parseFloat(formData.temp_hotspot),
-                    observaciones: formData.observaciones,
-                    estado_calculado: estadoCalculado,
-                    tecnico_nombre: 'Nahuel'
+                    id_panel: panelId,
+                    fecha_inspeccion: new Date().toISOString(),
+                    tecnico_responsable: formData.tecnico_responsable,
+                    clima: formData.clima,
+                    tipo_inspeccion: formData.tipo_inspeccion
                 }
             ])
 
-        // 3. Actualizar el estado actual del Panel (Para que se vea en la lista)
-        const { error: errorUpdate } = await supabase
-            .from('paneles')
-            .update({ ultimo_estado: estadoCalculado })
-            .eq('id', panelId)
-
         setLoading(false)
 
-        if (errorInsert || errorUpdate) {
-            alert('Error guardando datos')
+        if (errorInsert) {
+            alert('Error guardando datos: ' + errorInsert.message)
         } else {
-            alert('¡Panel Actualizado a: ' + estadoCalculado + '!')
+            alert('¡Inspección registrada exitosamente!')
             onCerrar() // Cierra y vuelve a la lista
         }
     }
@@ -70,57 +54,60 @@ export function InspeccionForm({ panelId, onCerrar }) {
             </h3>
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
-                {/* CHECKLIST VISUAL */}
+                {/* DATOS DE INSPECCIÓN */}
                 <div className="space-y-4">
+                    <label className="flex flex-col p-3 bg-surface-light/50 rounded-lg border border-border hover:border-brand-secondary/50 transition-colors">
+                        <span className="font-medium text-main mb-2">Técnico Responsable:</span>
+                        <input
+                            type="text"
+                            name="tecnico_responsable"
+                            value={formData.tecnico_responsable}
+                            onChange={handleChange}
+                            placeholder="Nombre del técnico"
+                            className="p-2 border border-border-light rounded bg-background text-heading focus:outline-none focus:ring-2 focus:ring-brand-secondary"
+                        />
+                    </label>
+
                     <label className="flex items-center justify-between p-3 bg-surface-light/50 rounded-lg border border-border hover:border-brand-secondary/50 transition-colors">
-                        <span className="font-medium text-main">Nivel de Limpieza:</span>
+                        <span className="font-medium text-main">Clima:</span>
                         <select
-                            name="limpieza"
-                            value={formData.limpieza}
+                            name="clima"
+                            value={formData.clima}
                             onChange={handleChange}
                             className="ml-3 p-2 border border-border-light rounded bg-background text-heading focus:outline-none focus:ring-2 focus:ring-brand-secondary"
                         >
-                            <option value="Alta">Alta (Limpio)</option>
-                            <option value="Media">Media</option>
-                            <option value="Baja">Baja (Sucio)</option>
+                            <option value="Soleado">☀️ Soleado</option>
+                            <option value="Nublado">☁️ Nublado</option>
+                            <option value="Lluvioso">🌧️ Lluvioso</option>
+                            <option value="Ventoso">💨 Ventoso</option>
                         </select>
                     </label>
 
-                    <label className="flex items-center justify-between p-3 bg-surface-light/50 rounded-lg border border-border hover:border-brand-secondary/50 transition-colors cursor-pointer">
-                        <span className="font-medium text-main">¿Sujeción e Integridad OK?</span>
-                        <input
-                            type="checkbox"
-                            name="sujecion_ok"
-                            checked={formData.sujecion_ok}
-                            onChange={handleChange}
-                            className="h-5 w-5 rounded border-border-light bg-background text-brand focus:ring-brand-secondary"
-                        />
-                    </label>
-
-                    {/* INSTRUMENTOS (Termografía) */}
                     <label className="flex items-center justify-between p-3 bg-surface-light/50 rounded-lg border border-border hover:border-brand-secondary/50 transition-colors">
-                        <span className="font-medium text-main flex items-center gap-2">
-                            <span>🌡️</span> Temp. Max Hotspot (ºC):
-                        </span>
-                        <input
-                            type="number"
-                            name="temp_hotspot"
-                            value={formData.temp_hotspot}
+                        <span className="font-medium text-main">Tipo de Inspección:</span>
+                        <select
+                            name="tipo_inspeccion"
+                            value={formData.tipo_inspeccion}
                             onChange={handleChange}
-                            className="ml-3 w-24 p-2 border border-border-light rounded bg-background text-heading focus:outline-none focus:ring-2 focus:ring-brand-secondary text-right"
-                        />
+                            className="ml-3 p-2 border border-border-light rounded bg-background text-heading focus:outline-none focus:ring-2 focus:ring-brand-secondary"
+                        >
+                            <option value="Termográfica">🌡️ Termográfica</option>
+                            <option value="Visual">👁️ Visual</option>
+                            <option value="Eléctrica">⚡ Eléctrica</option>
+                            <option value="Mantenimiento">🔧 Mantenimiento</option>
+                        </select>
                     </label>
                 </div>
 
                 <label className="flex flex-col">
-                    <span className="font-medium mb-2 text-muted">Observaciones:</span>
+                    <span className="font-medium mb-2 text-muted">Observaciones (Opcional):</span>
                     <textarea
                         name="observaciones"
                         value={formData.observaciones}
                         onChange={handleChange}
                         rows="3"
                         className="p-3 border border-border-light rounded-lg bg-background text-heading w-full focus:outline-none focus:ring-2 focus:ring-brand-secondary"
-                        placeholder="Escribe aquí notas adicionales del técnico..."
+                        placeholder="Escribe aquí notas adicionales de la inspección..."
                     />
                 </label>
 

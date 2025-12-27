@@ -3,7 +3,6 @@ import { supabase } from './supabase'
 import { InspeccionForm } from './InspeccionForm'
 import { Dashboard } from './Dashboard'
 import { Navigation } from './Navigation'
-import { ParqueForm } from './ParqueForm'
 import { ParqueList } from './ParqueList'
 
 function App() {
@@ -11,29 +10,37 @@ function App() {
   const [panelSeleccionado, setPanelSeleccionado] = useState(null)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [parques, setParques] = useState([])
+  const [parqueSeleccionado, setParqueSeleccionado] = useState(null)
 
   useEffect(() => {
     getPaneles()
     getParques()
-  }, [panelSeleccionado])
+  }, [panelSeleccionado, parqueSeleccionado])
 
   async function getPaneles() {
-    const { data, error } = await supabase
-      .from('paneles')
+    // 1. Seleccionamos solo los datos del panel primero para asegurar que carguen
+    // Nota: Quitamos "new_inspecciones!id_panel" porque esa relación ya no existe en tu diagrama nuevo
+    let query = supabase
+      .from('new_inventario_paneles')
       .select(`
-        *,
-        inspecciones (
-          temp_hotspot,
-          limpieza,
-          sujecion_ok,
-          estado_calculado,
-          created_at
-        )
+        *
       `)
-      .order('id', { ascending: true })
 
-    if (error) console.log('Error:', error)
-    else setPaneles(data)
+    // 2. Este es el filtro importante que querías
+    // Si hay un parque seleccionado, filtramos por su ID
+    if (parqueSeleccionado) {
+      query = query.eq('id_parque', parqueSeleccionado)
+    }
+
+    query = query.order('id_panel', { ascending: true })
+
+    const { data, error } = await query
+
+    if (error) {
+      console.log('Error cargando paneles:', error.message)
+    } else {
+      setPaneles(data)
+    }
   }
 
   async function getParques() {
@@ -44,6 +51,16 @@ function App() {
 
     if (error) console.log('Error:', error)
     else setParques(data)
+  }
+
+  const handleVerPaneles = (idParque) => {
+    // Guardar el parque seleccionado y cambiar a la pestaña de dashboard
+    setParqueSeleccionado(idParque)
+    setActiveTab('dashboard')
+  }
+
+  const limpiarFiltroParque = () => {
+    setParqueSeleccionado(null)
   }
 
   const getStatusColor = (estado) => {
@@ -60,18 +77,15 @@ function App() {
     if (panel.ultimo_estado === 'OPERATIVO') return <span className="text-green-400">Rendimiento óptimo</span>;
 
     // Buscar la última inspección
-    if (!panel.inspecciones || panel.inspecciones.length === 0) return <span className="text-gray-500">Sin datos</span>;
+    if (!panel.new_inspecciones || panel.new_inspecciones.length === 0) return <span className="text-gray-500">Sin datos</span>;
 
     // Ordenar por fecha (más reciente primero) si vienen desordenadas
-    const inspecciones = panel.inspecciones.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const inspecciones = panel.new_inspecciones.sort((a, b) => new Date(b.fecha_inspeccion) - new Date(a.fecha_inspeccion));
     const last = inspecciones[0];
 
-    if (last.estado_calculado === 'CRITICO') {
-      if (last.temp_hotspot > 20) return <span className="text-critical">🔥 Hotspot: {last.temp_hotspot}ºC</span>;
-      if (!last.sujecion_ok) return <span className="text-critical">⚠️ Sujeción Fallida</span>;
-    }
-    if (last.estado_calculado === 'ALERTA') {
-      if (last.limpieza === 'Baja') return <span className="text-warning">🧹 Limpieza Requerida</span>;
+    // Retornar información básica de la inspección
+    if (last.tipo_inspeccion) {
+      return <span className="text-muted">📋 {last.tipo_inspeccion} - {last.tecnico_responsable || 'Sin técnico'}</span>;
     }
 
     return <span className="text-muted">Ver detalles</span>;
@@ -109,7 +123,23 @@ function App() {
             ) : (
               <div className="bg-surface/50 backdrop-blur-sm rounded-xl border border-border overflow-hidden shadow-2xl">
                 <div className="p-6 border-b border-border flex justify-between items-center bg-surface">
-                  <h2 className="text-lg font-semibold text-heading">Estado de Paneles en Tiempo Real</h2>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-lg font-semibold text-heading">Estado de Paneles en Tiempo Real</h2>
+                    {parqueSeleccionado && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs px-3 py-1 bg-brand/20 rounded-lg text-brand-secondary border border-brand/30">
+                          📍 Parque #{parqueSeleccionado} - {parques.find(p => p.id_parque === parqueSeleccionado)?.nombre_cliente}
+                        </span>
+                        <button
+                          onClick={limpiarFiltroParque}
+                          className="text-xs px-2 py-1 bg-surface-light hover:bg-brand/10 text-muted hover:text-heading rounded border border-border-light hover:border-brand transition-all"
+                          title="Ver todos los paneles"
+                        >
+                          ✕ Ver todos
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <span className="text-xs px-2 py-1 bg-surface-light rounded text-muted border border-border-light">Total: {paneles.length}</span>
                 </div>
 
@@ -131,11 +161,11 @@ function App() {
                           className="hover:bg-surface-light/30 transition-colors group"
                         >
                           <td className="p-4 text-muted font-mono text-sm">
-                            #{panel.id.toString().padStart(3, '0')}
+                            #{panel.id_panel.toString().padStart(3, '0')}
                           </td>
                           <td className="p-4">
-                            <div className="font-medium text-heading">{panel.codigo_serie}</div>
-                            <div className="text-xs text-muted">{panel.modelo}</div>
+                            <div className="font-medium text-heading">{panel.serial_number || 'N/A'}</div>
+                            <div className="text-xs text-muted">{panel.marca_modelo || 'Sin modelo'}</div>
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
@@ -154,7 +184,7 @@ function App() {
                           </td>
                           <td className="p-4 text-right">
                             <button
-                              onClick={() => setPanelSeleccionado(panel.id)}
+                              onClick={() => setPanelSeleccionado(panel.id_panel)}
                               className="px-3 py-1.5 text-xs font-medium bg-surface-light hover:bg-brand text-heading rounded border border-border-light hover:border-brand-secondary transition-all shadow-sm"
                             >
                               {panel.ultimo_estado === 'PENDIENTE' ? 'Realizar Inspección' : 'Ver / Editar'}
@@ -172,10 +202,7 @@ function App() {
 
         {/* PARQUES TAB */}
         {activeTab === 'parques' && (
-          <div className="space-y-6">
-            <ParqueForm onParqueCreado={getParques} />
-            <ParqueList parques={parques} />
-          </div>
+          <ParqueList parques={parques} onParqueCreado={getParques} onVerPaneles={handleVerPaneles} />
         )}
       </div>
     </div>

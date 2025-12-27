@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ParqueForm } from './ParqueForm';
 
-export function ParqueList({ parques, onParqueCreado }) {
+export function ParqueList({ parques, onParqueCreado, onVerPaneles }) {
     const [mostrarForm, setMostrarForm] = useState(false);
 
     const handleParqueCreado = () => {
@@ -70,6 +70,7 @@ export function ParqueList({ parques, onParqueCreado }) {
                                 <th className="p-4 font-medium border-b border-border">Ubicación</th>
                                 <th className="p-4 font-medium border-b border-border">Capacidad (MWp)</th>
                                 <th className="p-4 font-medium border-b border-border">Fecha Registro</th>
+                                <th className="p-4 font-medium border-b border-border text-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/50">
@@ -98,6 +99,14 @@ export function ParqueList({ parques, onParqueCreado }) {
                                             month: 'short',
                                             day: 'numeric'
                                         })}
+                                    </td>
+                                    <td className="p-4 text-right">
+                                        <button
+                                            onClick={() => onVerPaneles && onVerPaneles(parque.id_parque)}
+                                            className="px-3 py-1.5 text-xs font-medium bg-surface-light hover:bg-brand text-heading rounded border border-border-light hover:border-brand-secondary transition-all shadow-sm"
+                                        >
+                                            Ver Paneles
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
