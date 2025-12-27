@@ -5,6 +5,20 @@ import { exportPanelesToCSV, exportInspeccionesToCSV, exportAllData } from './ex
 export function Dashboard({ paneles }) {
     const [showExportMenu, setShowExportMenu] = useState(false);
 
+    // Función para obtener el último estado del panel basado en sus hallazgos
+    const getEstadoPanel = (panel) => {
+        if (!panel.new_registo_hallazgos || panel.new_registo_hallazgos.length === 0) {
+            return 'PENDIENTE'
+        }
+
+        // Ordenar hallazgos por fecha (más reciente primero)
+        const hallazgosOrdenados = [...panel.new_registo_hallazgos].sort(
+            (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        )
+
+        return hallazgosOrdenados[0].estado_actual || 'PENDIENTE'
+    }
+
     // 1. Calcular estadísticas en tiempo real
     const data = [
         { name: 'Críticos', value: 0, color: 'var(--status-critical)' }, // Rojo
@@ -14,10 +28,11 @@ export function Dashboard({ paneles }) {
     ];
 
     paneles.forEach(panel => {
-        if (panel.ultimo_estado === 'CRITICO') data[0].value++;
-        else if (panel.ultimo_estado === 'ALERTA') data[1].value++;
-        else if (panel.ultimo_estado === 'OPERATIVO') data[2].value++;
-        else data[3].value++; // Cualquier otro caso (null, PENDIENTE, etc)
+        const estado = getEstadoPanel(panel)
+        if (estado === 'CRITICO') data[0].value++;
+        else if (estado === 'ALERTA') data[1].value++;
+        else if (estado === 'OPERATIVO') data[2].value++;
+        else data[3].value++; // PENDIENTE o cualquier otro caso
     });
 
     // Filtrar los que tengan 0 para que no salgan feos en el gráfico

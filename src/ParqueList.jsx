@@ -110,7 +110,7 @@ export function ParqueList({ parques, onParqueCreado, onVerPaneles, onNuevaInspe
                                             </button>
                                             <button
                                                 onClick={() => onVerPaneles && onVerPaneles(parque.id_parque)}
-                                                className="px-3 py-1.5 text-xs font-medium bg-surface-light hover:bg-brand text-heading rounded border border-border-light hover:border-brand-secondary transition-all shadow-sm"
+                                                className="px-3 py-1.5 text-xs font-medium bg-surface-light hover:bg-brand hover:text-[var(--text-secondary)] text-heading rounded border border-border-light hover:border-brand-secondary transition-all shadow-sm"
                                             >
                                                 Ver Paneles
                                             </button>

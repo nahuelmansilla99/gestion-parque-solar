@@ -65,7 +65,7 @@ export function HallazgoForm({ idInspeccion, idPanel, panelInfo, onCerrar, onHal
         e.preventDefault()
 
         if (formData.defectos_seleccionados.length === 0) {
-            alert('Por favor selecciona al menos un tipo de defecto')
+            // alert('Por favor selecciona al menos un tipo de defecto')
             return
         }
 
@@ -89,12 +89,12 @@ export function HallazgoForm({ idInspeccion, idPanel, panelInfo, onCerrar, onHal
         setLoading(false)
 
         if (error) {
-            alert('Error guardando hallazgo: ' + error.message)
+            // alert('Error guardando hallazgo: ' + error.message)
         } else {
             const mensaje = hallazgos.length === 1
                 ? '¡Hallazgo registrado exitosamente!'
                 : `¡${hallazgos.length} hallazgos registrados exitosamente!`
-            alert(mensaje)
+            // alert(mensaje)
             if (onHallazgoCreado) {
                 onHallazgoCreado()
             } else {
@@ -228,7 +228,7 @@ export function HallazgoForm({ idInspeccion, idPanel, panelInfo, onCerrar, onHal
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex-1 px-4 py-2 bg-brand text-heading font-medium rounded-lg hover:bg-brand-secondary disabled:bg-surface-light disabled:text-muted transition-all shadow-lg shadow-brand/30"
+                        className="flex-1 px-4 py-2 bg-brand text-[var(--text-secondary)] font-medium rounded-lg hover:bg-brand-secondary disabled:bg-surface-light disabled:text-muted transition-all shadow-lg shadow-brand/30"
                     >
                         {loading ? 'Guardando...' : 'Guardar Hallazgo'}
                     </button>

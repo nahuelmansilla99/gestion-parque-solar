@@ -45,7 +45,7 @@ export function InspeccionForm({ parqueId, onCerrar, onInspeccionCreada }) {
         if (errorInsert) {
             alert('Error guardando datos: ' + errorInsert.message)
         } else {
-            alert('¡Inspección registrada exitosamente!')
+            // alert('¡Inspección registrada exitosamente!')
             // Llamar al callback con el parqueId y el ID de la inspección creada
             if (onInspeccionCreada && data) {
                 onInspeccionCreada(parqueId, data.id_inspeccion)
@@ -124,7 +124,7 @@ export function InspeccionForm({ parqueId, onCerrar, onInspeccionCreada }) {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex-1 px-4 py-2 bg-brand text-heading font-medium rounded-lg hover:bg-brand-secondary disabled:bg-surface-light disabled:text-muted transition-all shadow-lg shadow-brand/30"
+                        className="flex-1 px-4 py-2 bg-brand text-[var(--text-secondary)] font-medium rounded-lg hover:bg-brand-secondary disabled:bg-surface-light disabled:text-muted transition-all shadow-lg shadow-brand/30"
                     >
                         {loading ? 'Guardando...' : 'Guardar Inspección'}
                     </button>
