@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ParqueForm } from './ParqueForm';
 
-export function ParqueList({ parques, onParqueCreado, onVerPaneles }) {
+export function ParqueList({ parques, onParqueCreado, onVerPaneles, onNuevaInspeccion }) {
     const [mostrarForm, setMostrarForm] = useState(false);
 
     const handleParqueCreado = () => {
@@ -101,12 +101,20 @@ export function ParqueList({ parques, onParqueCreado, onVerPaneles }) {
                                         })}
                                     </td>
                                     <td className="p-4 text-right">
-                                        <button
-                                            onClick={() => onVerPaneles && onVerPaneles(parque.id_parque)}
-                                            className="px-3 py-1.5 text-xs font-medium bg-surface-light hover:bg-brand text-heading rounded border border-border-light hover:border-brand-secondary transition-all shadow-sm"
-                                        >
-                                            Ver Paneles
-                                        </button>
+                                        <div className="flex gap-2 justify-end">
+                                            <button
+                                                onClick={() => onNuevaInspeccion && onNuevaInspeccion(parque.id_parque)}
+                                                className="px-3 py-1.5 text-xs font-medium bg-brand hover:bg-brand-secondary text-white rounded border border-brand-secondary hover:border-brand transition-all shadow-sm"
+                                            >
+                                                🔍 Nueva Inspección
+                                            </button>
+                                            <button
+                                                onClick={() => onVerPaneles && onVerPaneles(parque.id_parque)}
+                                                className="px-3 py-1.5 text-xs font-medium bg-surface-light hover:bg-brand text-heading rounded border border-border-light hover:border-brand-secondary transition-all shadow-sm"
+                                            >
+                                                Ver Paneles
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

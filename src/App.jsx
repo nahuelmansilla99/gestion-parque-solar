@@ -11,6 +11,7 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [parques, setParques] = useState([])
   const [parqueSeleccionado, setParqueSeleccionado] = useState(null)
+  const [parqueParaInspeccion, setParqueParaInspeccion] = useState(null)
 
   useEffect(() => {
     getPaneles()
@@ -61,6 +62,10 @@ function App() {
 
   const limpiarFiltroParque = () => {
     setParqueSeleccionado(null)
+  }
+
+  const handleNuevaInspeccion = (idParque) => {
+    setParqueParaInspeccion(idParque)
   }
 
   const getStatusColor = (estado) => {
@@ -116,10 +121,9 @@ function App() {
             {!panelSeleccionado && <Dashboard paneles={paneles} />}
 
             {panelSeleccionado ? (
-              <InspeccionForm
-                panelId={panelSeleccionado}
-                onCerrar={() => setPanelSeleccionado(null)}
-              />
+              <div className="text-center text-muted p-8">
+                Panel seleccionado: {panelSeleccionado}
+              </div>
             ) : (
               <div className="bg-surface/50 backdrop-blur-sm rounded-xl border border-border overflow-hidden shadow-2xl">
                 <div className="p-6 border-b border-border flex justify-between items-center bg-surface">
@@ -202,7 +206,21 @@ function App() {
 
         {/* PARQUES TAB */}
         {activeTab === 'parques' && (
-          <ParqueList parques={parques} onParqueCreado={getParques} onVerPaneles={handleVerPaneles} />
+          <>
+            {parqueParaInspeccion ? (
+              <InspeccionForm
+                parqueId={parqueParaInspeccion}
+                onCerrar={() => setParqueParaInspeccion(null)}
+              />
+            ) : (
+              <ParqueList
+                parques={parques}
+                onParqueCreado={getParques}
+                onVerPaneles={handleVerPaneles}
+                onNuevaInspeccion={handleNuevaInspeccion}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

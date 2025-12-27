@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from './supabase'
 
-export function InspeccionForm({ panelId, onCerrar }) {
+export function InspeccionForm({ parqueId, onCerrar }) {
     const [loading, setLoading] = useState(false)
 
     // Estados para tus datos de campo
@@ -29,11 +29,12 @@ export function InspeccionForm({ panelId, onCerrar }) {
             .from('new_inspecciones')
             .insert([
                 {
-                    id_panel: panelId,
+                    id_parque: parqueId,
                     fecha_inspeccion: new Date().toISOString(),
                     tecnico_responsable: formData.tecnico_responsable,
                     clima: formData.clima,
-                    tipo_inspeccion: formData.tipo_inspeccion
+                    tipo_inspeccion: formData.tipo_inspeccion,
+                    observaciones: formData.observaciones
                 }
             ])
 
@@ -50,7 +51,7 @@ export function InspeccionForm({ panelId, onCerrar }) {
     return (
         <div className="border border-border p-6 mt-6 bg-surface text-heading rounded-xl shadow-2xl">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                <span className="text-brand-secondary">🔍</span> Inspeccionando Panel #{panelId}
+                <span className="text-brand-secondary">🔍</span> Nueva Inspección del Parque #{parqueId}
             </h3>
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
