@@ -133,7 +133,7 @@ function App() {
             <div className="w-10 h-10 bg-brand rounded-lg flex items-center justify-center text-heading font-bold text-xl shadow-lg shadow-blue-900/50">
               ⚡
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-heading">SolarCondicional <span className="text-brand-secondary">Manager</span></h1>
+            <h1 className="text-2xl font-bold tracking-tight text-heading"><span className="text-brand-secondary">Auditoria</span> Parque Solar</h1>
           </div>
           <div className="text-sm text-muted">
             Parque Fotovoltaico "La Luz 1" <span className="text-xs px-2 py-1 bg-surface rounded text-warning border border-border">(TEST)</span>
