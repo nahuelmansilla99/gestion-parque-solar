@@ -2,85 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* BACKGROUNDS */
+/* :root {
   --bg-main: #0f172a;
-  /* slate-900 */
   --bg-surface: #1e293b;
-  /* slate-800 */
   --bg-surface-light: #334155;
-  /* slate-700 */
 
-  /* BORDERS */
   --border-main: #334155;
-  /* slate-700 */
   --border-light: #475569;
-  /* slate-600 */
 
-  /* TEXT */
   --text-main: #e2e8f0;
-  /* slate-200 */
   --text-heading: #ffffff;
-  /* white */
   --text-muted: #94a3b8;
-  /* slate-400 */
 
-  /* BRAND */
   --brand-primary: #2563eb;
-  /* blue-600 */
   --brand-secondary: #3b82f6;
-  /* blue-500 */
   --brand-glow: rgba(30, 64, 175, 0.5);
-  /* blue-900/50 approx */
 
-  /* STATUS */
   --status-critical: #ef4444;
-  /* red-500 */
   --status-warning: #eab308;
-  /* yellow-500 */
   --status-success: #22c55e;
-  /* green-500 */
   --status-dim: #9ca3af;
-  /* gray-400 */
-
-}
+} */
 
 /* Light Mode */
-@media (prefers-color-scheme: light) {
+/* @media (prefers-color-scheme: light) { */
   :root {
-    /* BACKGROUNDS */
     --bg-main: #f8fafc;
-    /* slate-50 */
     --bg-surface: #ffffff;
-    /* white */
     --bg-surface-light: #f1f5f9;
-    /* slate-100 */
 
-    /* BORDERS */
     --border-main: #e2e8f0;
-    /* slate-200 */
     --border-light: #cbd5e1;
-    /* slate-300 */
 
-    /* TEXT */
     --text-main: #1e293b;
-    /* slate-800 */
     --text-heading: #0f172a;
-    /* slate-900 */
     --text-muted: #64748b;
-    /* slate-500 */
+    --text-secondary: #ffffff;
 
-    /* BRAND */
     --brand-primary: #2563eb;
-    /* blue-600 */
     --brand-secondary: #3b82f6;
-    /* blue-500 */
     --brand-glow: rgba(59, 130, 246, 0.2);
-    /* blue-500/20 */
 
-
+    --status-critical: #ef4444;
+    --status-warning: #eab308;
+    --status-success: #22c55e;
+    --status-dim: #9ca3af;
   }
-}
+/* } */
 
 /* Animations */
 @keyframes fadeIn {

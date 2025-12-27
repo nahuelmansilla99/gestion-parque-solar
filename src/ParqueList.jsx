@@ -53,7 +53,7 @@ export function ParqueList({ parques, onParqueCreado, onVerPaneles, onNuevaInspe
                         </span>
                         <button
                             onClick={() => setMostrarForm(!mostrarForm)}
-                            className="px-4 py-2 bg-brand hover:bg-brand-secondary text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-brand-glow flex items-center gap-2"
+                            className="px-4 py-2 bg-brand hover:bg-brand-secondary text-[var(--text-secondary)] text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-brand-glow flex items-center gap-2"
                         >
                             <span>{mostrarForm ? '✕' : '+'}</span>
                             {mostrarForm ? 'Cancelar' : 'Nuevo Parque'}
@@ -104,7 +104,7 @@ export function ParqueList({ parques, onParqueCreado, onVerPaneles, onNuevaInspe
                                         <div className="flex gap-2 justify-end">
                                             <button
                                                 onClick={() => onNuevaInspeccion && onNuevaInspeccion(parque.id_parque)}
-                                                className="px-3 py-1.5 text-xs font-medium bg-brand hover:bg-brand-secondary text-white rounded border border-brand-secondary hover:border-brand transition-all shadow-sm"
+                                                className="px-3 py-1.5 text-xs font-medium bg-brand hover:bg-brand-secondary text-[var(--text-secondary)] rounded border border-brand-secondary hover:border-brand transition-all shadow-sm"
                                             >
                                                 🔍 Nueva Inspección
                                             </button>

@@ -129,7 +129,7 @@ export function ParqueForm({ onParqueCreado }) {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full px-6 py-3 bg-brand hover:bg-brand-secondary text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-brand-glow disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-6 py-3 bg-brand hover:bg-brand-secondary text-[var(--text-secondary)] font-medium rounded-lg transition-all shadow-lg hover:shadow-brand-glow disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {loading ? 'Registrando...' : 'Registrar Parque'}
                 </button>

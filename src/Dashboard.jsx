@@ -52,10 +52,10 @@ export function Dashboard({ paneles }) {
                     <div className="relative">
                         <button
                             onClick={() => setShowExportMenu(!showExportMenu)}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-brand hover:bg-brand-secondary text-heading text-xs font-medium rounded-lg transition-all shadow-md shadow-brand/30"
+                            className="flex items-center gap-2 px-3 mx-3 py-1.5 bg-brand hover:bg-brand-secondary text-heading text-xs font-medium rounded-lg transition-all shadow-md shadow-brand/30"
                         >
                             <span>📥</span>
-                            <span>Exportar</span>
+                            <span className="text-[var(--text-secondary)]">Exportar</span>
                         </button>
 
                         {/* Dropdown Menu */}
