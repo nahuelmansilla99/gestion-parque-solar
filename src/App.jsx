@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 import { InspeccionForm } from './InspeccionForm'
+import { HallazgoForm } from './HallazgoForm'
 import { Dashboard } from './Dashboard'
 import { Navigation } from './Navigation'
 import { ParqueList } from './ParqueList'
@@ -12,6 +13,8 @@ function App() {
   const [parques, setParques] = useState([])
   const [parqueSeleccionado, setParqueSeleccionado] = useState(null)
   const [parqueParaInspeccion, setParqueParaInspeccion] = useState(null)
+  const [inspeccionActiva, setInspeccionActiva] = useState(null)
+  const [panelParaHallazgo, setPanelParaHallazgo] = useState(null)
 
   useEffect(() => {
     getPaneles()
@@ -68,6 +71,31 @@ function App() {
     setParqueParaInspeccion(idParque)
   }
 
+  const handleInspeccionCreada = (idParque, idInspeccion) => {
+    // Cerrar el formulario de inspección
+    setParqueParaInspeccion(null)
+    // Guardar la inspección activa
+    setInspeccionActiva(idInspeccion)
+    // Navegar al dashboard con el parque seleccionado
+    setParqueSeleccionado(idParque)
+    setActiveTab('dashboard')
+  }
+
+  const limpiarModoInspeccion = () => {
+    setInspeccionActiva(null)
+    setPanelParaHallazgo(null)
+  }
+
+  const handleRegistrarHallazgo = (panel) => {
+    setPanelParaHallazgo(panel)
+  }
+
+  const handleHallazgoCreado = () => {
+    setPanelParaHallazgo(null)
+    // Recargar paneles para actualizar la vista
+    getPaneles()
+  }
+
   const getStatusColor = (estado) => {
     switch (estado) {
       case 'CRITICO': return 'bg-[var(--status-critical)] shadow-[0_0_8px_rgba(239,68,68,0.6)]';
@@ -108,7 +136,7 @@ function App() {
             <h1 className="text-2xl font-bold tracking-tight text-heading">SolarCondicional <span className="text-brand-secondary">Manager</span></h1>
           </div>
           <div className="text-sm text-muted">
-            Parque Fotovoltaico "La Luz 1"
+            Parque Fotovoltaico "La Luz 1" <span className="text-xs px-2 py-1 bg-surface rounded text-warning border border-border">(TEST)</span>
           </div>
         </header>
 
@@ -120,7 +148,15 @@ function App() {
           <>
             {!panelSeleccionado && <Dashboard paneles={paneles} />}
 
-            {panelSeleccionado ? (
+            {panelParaHallazgo ? (
+              <HallazgoForm
+                idInspeccion={inspeccionActiva}
+                idPanel={panelParaHallazgo.id_panel}
+                panelInfo={panelParaHallazgo}
+                onCerrar={() => setPanelParaHallazgo(null)}
+                onHallazgoCreado={handleHallazgoCreado}
+              />
+            ) : panelSeleccionado ? (
               <div className="text-center text-muted p-8">
                 Panel seleccionado: {panelSeleccionado}
               </div>
@@ -144,7 +180,18 @@ function App() {
                       </div>
                     )}
                   </div>
-                  <span className="text-xs px-2 py-1 bg-surface-light rounded text-muted border border-border-light">Total: {paneles.length}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs px-2 py-1 bg-surface-light rounded text-muted border border-border-light">Total: {paneles.length}</span>
+                    {inspeccionActiva && (
+                      <button
+                        onClick={limpiarModoInspeccion}
+                        className="px-4 py-2 bg-brand hover:bg-brand-secondary text-white text-sm font-medium rounded-lg transition-all shadow-md hover:shadow-brand-glow flex items-center gap-2"
+                        title="Desactivar modo inspección"
+                      >
+                        🔍 Modo Inspección Activo
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -187,12 +234,21 @@ function App() {
                             {getDiagnostico(panel)}
                           </td>
                           <td className="p-4 text-right">
-                            <button
-                              onClick={() => setPanelSeleccionado(panel.id_panel)}
-                              className="px-3 py-1.5 text-xs font-medium bg-surface-light hover:bg-brand text-heading rounded border border-border-light hover:border-brand-secondary transition-all shadow-sm"
-                            >
-                              {panel.ultimo_estado === 'PENDIENTE' ? 'Realizar Inspección' : 'Ver / Editar'}
-                            </button>
+                            {inspeccionActiva ? (
+                              <button
+                                onClick={() => handleRegistrarHallazgo(panel)}
+                                className="px-3 py-1.5 text-xs font-medium bg-brand hover:bg-brand-secondary text-white rounded border border-brand-secondary hover:border-brand transition-all shadow-sm"
+                              >
+                                📋 Registrar Hallazgo
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => setPanelSeleccionado(panel.id_panel)}
+                                className="px-3 py-1.5 text-xs font-medium bg-surface-light hover:bg-brand text-heading rounded border border-border-light hover:border-brand-secondary transition-all shadow-sm"
+                              >
+                                {panel.ultimo_estado === 'PENDIENTE' ? 'Realizar Inspección' : 'Ver / Editar'}
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -211,6 +267,7 @@ function App() {
               <InspeccionForm
                 parqueId={parqueParaInspeccion}
                 onCerrar={() => setParqueParaInspeccion(null)}
+                onInspeccionCreada={handleInspeccionCreada}
               />
             ) : (
               <ParqueList

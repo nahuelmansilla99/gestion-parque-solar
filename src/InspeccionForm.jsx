@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from './supabase'
 
-export function InspeccionForm({ parqueId, onCerrar }) {
+export function InspeccionForm({ parqueId, onCerrar, onInspeccionCreada }) {
     const [loading, setLoading] = useState(false)
 
     // Estados para tus datos de campo
@@ -25,7 +25,7 @@ export function InspeccionForm({ parqueId, onCerrar }) {
         setLoading(true)
 
         // Guardar la inspección en la nueva tabla
-        const { error: errorInsert } = await supabase
+        const { data, error: errorInsert } = await supabase
             .from('new_inspecciones')
             .insert([
                 {
@@ -37,6 +37,8 @@ export function InspeccionForm({ parqueId, onCerrar }) {
                     observaciones: formData.observaciones
                 }
             ])
+            .select('id_inspeccion')
+            .single()
 
         setLoading(false)
 
@@ -44,7 +46,12 @@ export function InspeccionForm({ parqueId, onCerrar }) {
             alert('Error guardando datos: ' + errorInsert.message)
         } else {
             alert('¡Inspección registrada exitosamente!')
-            onCerrar() // Cierra y vuelve a la lista
+            // Llamar al callback con el parqueId y el ID de la inspección creada
+            if (onInspeccionCreada && data) {
+                onInspeccionCreada(parqueId, data.id_inspeccion)
+            } else {
+                onCerrar() // Fallback
+            }
         }
     }
 
@@ -96,6 +103,7 @@ export function InspeccionForm({ parqueId, onCerrar }) {
                             <option value="Visual">👁️ Visual</option>
                             <option value="Eléctrica">⚡ Eléctrica</option>
                             <option value="Mantenimiento">🔧 Mantenimiento</option>
+                            <option value="General">📝 General</option> 
                         </select>
                     </label>
                 </div>
